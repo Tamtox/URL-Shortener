@@ -12,7 +12,20 @@ export const url_usage = pgTable(TABLE_NAMES.URLS, {
     .references(() => urls.id, { onDelete: 'cascade' }),
   count: numeric('count').notNull(),
   ip_addresses: jsonb('ip_addresses').default(sql`'[]'::jsonb`),
-  valid_until: timestamp('valid_until').notNull(),
+  created_at: timestamp('created_at').defaultNow(),
 });
 export type UrlUsage = InferSelectModel<typeof url_usage>;
 export const URL_USAGE_COLS = Object.keys(url_usage) as readonly (keyof UrlUsage)[];
+
+export class UrlUsageDto {
+  @ApiProperty({ type: 'number', description: 'Usage Id' })
+  id: string;
+  @ApiProperty({ type: 'number', description: 'Url Id' })
+  url_id: string;
+  @ApiProperty({ type: 'number', description: 'Usage count' })
+  count: number;
+  @ApiProperty({ type: 'array', description: 'Last 5 IP addresses' })
+  ip_addresses: string[];
+  @ApiProperty({ type: 'string', format: 'date-time', description: 'User creation date' })
+  created_at: Date;
+}
