@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - SERVER_PORT=3001
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=url_shortener
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - docker.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  volumes:
+    postgres_data:

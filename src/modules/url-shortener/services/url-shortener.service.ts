@@ -3,10 +3,12 @@ import { ShortenUrlDto } from '../dtos/url-shortener.dto';
 import { CustomError } from 'src/common/errors/custom_error';
 import * as crypto from 'crypto';
 import { UrlShortenerRepositoryService } from './url-shortener-repository.service';
+import { CreateUrlData } from '../types/url-shotener-repository.types';
 
 @Injectable()
 export class UrlShortenerService {
   constructor(private readonly urlShortenerRepositoryService: UrlShortenerRepositoryService) {}
+  // #region Check URL Exists ---------------------------------------------------------------------------------------------------------------
   async checkUrlExists(id: number | null, shortUrl: string | null, originalUrl: string | null) {
     if (id === null && shortUrl === null) {
       throw new CustomError('Either id or shortUrl must be provided', 400, 'Validation error');
@@ -27,6 +29,7 @@ export class UrlShortenerService {
     }
     return usage;
   }
+  // #region Generate Short URL --------------------------------------------------------------------------------------------------------------
   async generateShortUrl() {
     const baseUrl = 'http://short.url/';
     // Generate 6 character string from incoming hash
@@ -45,27 +48,51 @@ export class UrlShortenerService {
     // Take first 6 characters
     return `${baseUrl}${hash}`;
   }
-  async shortenUrl(body: ShortenUrlDto) {
+  // #region Create URL ---------------------------------------------------------------------------------------------------------------------
+  async createUrlProcess(body: ShortenUrlDto) {
     const existingUrl = await this.urlShortenerRepositoryService.getShortUrl(null, null, body.url);
     if (existingUrl) {
       return existingUrl;
     }
+    let shortUrl: string;
+    if (body.alias) {
+      shortUrl = `http://short.url/${body.alias}`;
+      const existingShortUrl = await this.urlShortenerRepositoryService.getShortUrl(null, shortUrl, null);
+      if (existingShortUrl) {
+        throw new CustomError('Short URL already exists', 400, 'Validation error');
+      }
+    } else {
+      shortUrl = await this.generateShortUrl();
+      let isUnique = false;
+      while (!isUnique) {
+        const existingShortUrl = await this.urlShortenerRepositoryService.getShortUrl(null, shortUrl, null);
+        if (!existingShortUrl) {
+          isUnique = true;
+        } else {
+          shortUrl = await this.generateShortUrl();
+        }
+      }
+    }
+    const data: CreateUrlData = {
+      original_url: body.url,
+      short_url: shortUrl,
+    };
+    if (body.validUntil) {
+      data.valid_until = body.validUntil;
+    }
+    const newUrl = await this.urlShortenerRepositoryService.createShortUrl(data);
+    return newUrl;
   }
-  async useShortUrl(shortUrl: string, ipAddress: string) {
+  // #region Use Short URL ------------------------------------------------------------------------------------------------------------------
+  async useShortUrlProcess(shortUrl: string, ipAddress: string) {
     if (!shortUrl) {
       throw new CustomError('Short URL is required', 404, 'Validation error');
     }
     const url = await this.checkUrlExists(null, shortUrl, null);
     return url;
   }
-  async getOriginalUrl(shortUrl: string) {
-    if (!shortUrl) {
-      throw new CustomError('Short URL is required', 404, 'Validation error');
-    }
-    const url = await this.urlShortenerRepositoryService.getShortUrl(null, shortUrl, null);
-    return url;
-  }
-  async deleteShortUrl(shortUrl: string) {
+  // #region Delete URL ---------------------------------------------------------------------------------------------------------------------
+  async deleteUrlProcess(shortUrl: string) {
     if (!shortUrl) {
       throw new CustomError('Short URL is required', 404, 'Validation error');
     }
@@ -76,11 +103,13 @@ export class UrlShortenerService {
     await this.urlShortenerRepositoryService.deleteShortUrl(url.id);
     return;
   }
-  async getUsageStats(shortUrl: string) {
+  // #region Get URL Usage Stats -------------------------------------------------------------------------------------------------------------
+  async getUsageStatsProcess(shortUrl: string) {
     if (!shortUrl) {
       throw new CustomError('Short URL is required', 404, 'Validation error');
     }
     const url = await this.checkUrlExists(null, shortUrl, null);
-    return url;
+    const usage = await this.checkUrlUsageExists(null, url.id);
+    return { url, usage };
   }
 }

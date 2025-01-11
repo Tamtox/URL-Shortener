@@ -7,6 +7,7 @@ import { query } from 'express';
 import { TABLE_NAMES } from 'src/common/constants/tables.constant';
 import { CustomError } from 'src/common/errors/custom_error';
 import { UrlUsage } from '../models/url-usage.model';
+import { CreateUrlData, CreateUrlUsageData } from '../types/url-shotener-repository.types';
 
 @Injectable()
 export class UrlShortenerRepositoryService {
@@ -43,6 +44,40 @@ export class UrlShortenerRepositoryService {
     }
     return url;
   }
+  async createShortUrl(data: CreateUrlData) {
+    let query = `INSERT INTO ${TABLE_NAMES.URLS}`;
+    let index = 1;
+    let queryCols: string[] = [];
+    let queryVals: string[] = [];
+    const vals: any[] = [];
+    if (data.short_url) {
+      queryCols.push('short_url');
+      queryVals.push(`$${index}`);
+      vals.push(data.short_url);
+      index++;
+    }
+    if (data.original_url) {
+      queryCols.push('original_url');
+      queryVals.push(`$${index}`);
+      vals.push(data.original_url);
+      index++;
+    }
+    if (data.valid_until) {
+      queryCols.push('valid_until');
+      queryVals.push(`$${index}`);
+      vals.push(data.valid_until);
+      index++;
+    }
+    if (data.created_at) {
+      queryCols.push('created_at');
+      queryVals.push(`$${index}`);
+      vals.push(data.created_at);
+      index++;
+    }
+    query += `(${queryCols.join(', ')}) VALUES (${queryVals.join(', ')}) RETURNING *`;
+    const result = await this.pg.query(query, vals);
+    return result.rows[0] as Url;
+  }
   async deleteShortUrl(id: number) {
     let query = `DELETE FROM ${TABLE_NAMES.URLS} WHERE id = $1`;
     const result = await this.pg.query(query, [id]);
@@ -68,5 +103,39 @@ export class UrlShortenerRepositoryService {
       return result.rows[0] as UrlUsage;
     }
     return usage;
+  }
+  async createUsageStats(data: CreateUrlUsageData) {
+    let query = `INSERT INTO ${TABLE_NAMES.USAGES}`;
+    let index = 1;
+    let queryCols: string[] = [];
+    let queryVals: string[] = [];
+    const vals: any[] = [];
+    if (data.url_id) {
+      queryCols.push('url_id');
+      queryVals.push(`$${index}`);
+      vals.push(data.url_id);
+      index++;
+    }
+    if (data.count) {
+      queryCols.push('count');
+      queryVals.push(`$${index}`);
+      vals.push(data.count);
+      index++;
+    }
+    if (data.ip_addresses) {
+      queryCols.push('ip_addresses');
+      queryVals.push(`$${index}`);
+      vals.push(data.ip_addresses);
+      index++;
+    }
+    if (data.created_at) {
+      queryCols.push('created_at');
+      queryVals.push(`$${index}`);
+      vals.push(data.created_at);
+      index++;
+    }
+    query += `(${queryCols.join(', ')}) VALUES (${queryVals.join(', ')}) RETURNING *`;
+    const result = await this.pg.query(query, vals);
+    return result.rows[0] as UrlUsage;
   }
 }

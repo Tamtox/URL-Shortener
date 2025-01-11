@@ -4,7 +4,6 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { databaseSchema } from './schema';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurableDatabaseModule, CONNECTION_POOL, DatabaseOptions, DRIZZLE_POOL } from './database.constant';
-// import dotenv
 
 @Global()
 @Module({
@@ -15,11 +14,11 @@ import { ConfigurableDatabaseModule, CONNECTION_POOL, DatabaseOptions, DRIZZLE_P
       inject: [ConfigService],
       useFactory: (config) => {
         const databaseOptions = {
-          host: config.get('SUPABASE_POSTGRES_HOST'),
-          port: config.get('SUPABASE_POSTGRES_PORT'),
-          user: config.get('SUPABASE_POSTGRES_USER'),
-          password: config.get('SUPABASE_POSTGRES_PASSWORD'),
-          database: config.get('SUPABASE_POSTGRES_DB'),
+          host: config.get('POSTGRES_HOST'),
+          port: config.get('POSTGRES_PORT'),
+          user: config.get('POSTGRES_USER'),
+          password: config.get('POSTGRES_PASSWORD'),
+          database: config.get('POSTGRES_DB'),
         };
         return databaseOptions;
       },
