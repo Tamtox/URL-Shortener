@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, Redirect } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, Post, Redirect } from '@nestjs/common';
 import { UrlShortenerService } from '../services/url-shortener.service';
 import { ShortenUrlDto, shortenUrlValidationSchema } from '../dtos/url-shortener.dto';
-import { ApiTags } from '@nestjs/swagger';
-import { ControllerNames } from 'src/common/constants/controllers.contant';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ControllerNames } from 'src/common/constants/controllers.constant';
 import { ZodValidationPipe } from 'src/common/pipes/validation.pipe';
+import { UrlDto } from '../models/short-url.model';
 
 const CONTROLLER_NAME = ControllerNames.UrlShortener as const;
 const CONTROLLER_TAGS = [CONTROLLER_NAME] as const;
@@ -12,25 +13,39 @@ const CONTROLLER_TAGS = [CONTROLLER_NAME] as const;
 export class UrlShortenerController {
   constructor(private readonly urlShortenerService: UrlShortenerService) {}
   // #region Shorten URL ---------------------------------------------------------------------------------------------------------------------
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Shortened URL created successfully', type: UrlDto })
   @Post('shorten')
+  @HttpCode(HttpStatus.CREATED)
   async shortenUrl(@Body(new ZodValidationPipe(shortenUrlValidationSchema)) shortenUrlDto: ShortenUrlDto) {
     const shortUrl = await this.urlShortenerService.shortenUrl(shortenUrlDto);
     return shortUrl;
   }
   // #region Redirect to Original URL --------------------------------------------------------------------------------------------------------
+  @ApiResponse({ status: HttpStatus.FOUND, description: 'Redirect to original URL' })
   @Get(':shortUrl')
-  @Redirect()
-  async redirect(@Param('shortUrl') shortUrl: string) {
-    const originalUrl = await this.urlShortenerService.getOriginalUrl(shortUrl);
+  @Redirect('https://nestjs.com', 302)
+  @HttpCode(HttpStatus.FOUND)
+  async redirect(@Param('shortUrl') shortUrl: string, @Ip() ip: string) {
+    const url = await this.urlShortenerService.useShortUrl(shortUrl, ip);
+    return { url: url.original_url };
   }
   // #region Get Original URL ----------------------------------------------------------------------------------------------------------------
+  @ApiResponse({ status: HttpStatus.OK, description: 'Original URL found', type: UrlDto })
   @Get('/info/:shortUrl')
   async getOriginalUrl(@Param('shortUrl') shortUrl: string) {
     return await this.urlShortenerService.getOriginalUrl(shortUrl);
   }
   // #region Delete Short URL -----------------------------------------------------------------------------------------------------------------
-  @Post('/delete/:shortUrl')
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Short URL deleted successfully' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('/delete/:shortUrl')
   async deleteShortUrl(@Param('shortUrl') shortUrl: string) {
-    return await this.urlShortenerService.deleteShortUrl(shortUrl);
+    await this.urlShortenerService.deleteShortUrl(shortUrl);
+    return `Short URL ${shortUrl} was deleted successfully`;
+  }
+  // #endregion Get URL Usage Stats -----------------------------------------------------------------------------------------------------------
+  @Get('/analytics/:shortUrl')
+  async getUsageStats(@Param('shortUrl') shortUrl: string) {
+    return await this.urlShortenerService.getUsageStats(shortUrl);
   }
 }

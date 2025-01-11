@@ -1,12 +1,10 @@
 import { TABLE_NAMES } from 'src/common/constants/tables.constant';
-import { pgTable, text, uuid, timestamp, boolean } from 'drizzle-orm/pg-core';
-import { sql, InferSelectModel } from 'drizzle-orm';
+import { pgTable, text, timestamp, serial } from 'drizzle-orm/pg-core';
+import { InferSelectModel } from 'drizzle-orm';
 import { ApiProperty } from '@nestjs/swagger';
 
 export const urls = pgTable(TABLE_NAMES.URLS, {
-  id: uuid('id')
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
+  id: serial('id').notNull().primaryKey(),
   short_url: text('short_url').unique().notNull(),
   original_url: text('original_url').unique().notNull(),
   created_at: timestamp('created_at').defaultNow(),
@@ -17,7 +15,7 @@ export const URL_COLS = Object.keys(urls) as readonly (keyof Url)[];
 
 export class UrlDto {
   @ApiProperty({ type: 'number', description: 'Url Id' })
-  id: string;
+  id: number;
   @ApiProperty({ type: 'string', description: 'Short URL' })
   short_url: string;
   @ApiProperty({ type: 'string', description: 'Original URL' })
