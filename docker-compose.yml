@@ -1,22 +1,16 @@
-version: '3.8'
-
 services:
   api:
     build: .
     ports:
       - "3001:3001"
+    env_file:
+      - .env
     environment:
-      - SERVER_PORT=3001
-      - POSTGRES_HOST=localhost
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
-      - POSTGRES_DB=url_shortener
+      - HOST=0.0.0.0
+    networks:
+      - app-network
     depends_on:
       - postgres
-    volumes:
-      - .:/app
-      - /app/node_modules
 
   postgres:
     image: postgres
@@ -26,5 +20,13 @@ services:
       - docker.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  volumes:
-    postgres_data:
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

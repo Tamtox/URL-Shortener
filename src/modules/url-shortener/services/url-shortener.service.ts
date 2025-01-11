@@ -3,7 +3,7 @@ import { ShortenUrlDto } from '../dtos/url-shortener.dto';
 import { CustomError } from 'src/common/errors/custom_error';
 import * as crypto from 'crypto';
 import { UrlShortenerRepositoryService } from './url-shortener-repository.service';
-import { CreateUrlData } from '../types/url-shotener-repository.types';
+import { CreateUrlData, CreateUrlUsageData } from '../types/url-shotener-repository.types';
 
 @Injectable()
 export class UrlShortenerService {
@@ -89,6 +89,16 @@ export class UrlShortenerService {
       throw new CustomError('Short URL is required', 404, 'Validation error');
     }
     const url = await this.checkUrlExists(null, shortUrl, null);
+    // let usage = await this.urlShortenerRepositoryService.getUsageStats(null, url.id);
+    // if (!usage) {
+    //   const data: CreateUrlUsageData = {
+    //     count: 1,
+    //     ip_addresses: [ipAddress],
+    //     url_id: url.id,
+    //   };
+    //   usage = await this.urlShortenerRepositoryService.createUsageStats(data);
+    // } else {
+    // }
     return url;
   }
   // #region Delete URL ---------------------------------------------------------------------------------------------------------------------
