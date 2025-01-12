@@ -2,11 +2,12 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, Post, Q
 import { UrlShortenerService } from '../services/url-shortener.service';
 import {
   ListUrlsDto,
+  ListUrlsDtoQuery,
   listUrlsValidationSchema,
   ShortenUrlDto,
   shortenUrlValidationSchema,
 } from '../dtos/url-shortener.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ControllerNames } from 'src/common/constants/controllers.constant';
 import { ZodValidationPipe } from 'src/common/pipes/validation.pipe';
 import { UrlDto } from '../models/short-url.model-type';
@@ -58,6 +59,18 @@ export class UrlShortenerController {
   }
   // #region Get All URLs --------------------------------------------------------------------------------------------------------------------
   @ApiResponse({ status: HttpStatus.OK, description: 'All URLs found', type: UrlDto, isArray: true })
+  @ApiQuery({ ...ListUrlsDtoQuery.id })
+  @ApiQuery({ ...ListUrlsDtoQuery.shortUrl })
+  @ApiQuery({ ...ListUrlsDtoQuery.originalUrl })
+  @ApiQuery({ ...ListUrlsDtoQuery.validUntilStart })
+  @ApiQuery({ ...ListUrlsDtoQuery.validUntilEnd })
+  @ApiQuery({ ...ListUrlsDtoQuery.usageCountStart })
+  @ApiQuery({ ...ListUrlsDtoQuery.usageCountEnd })
+  @ApiQuery({ ...ListUrlsDtoQuery.ipAddress })
+  @ApiQuery({ ...ListUrlsDtoQuery.createdAtStart })
+  @ApiQuery({ ...ListUrlsDtoQuery.createdAtEnd })
+  @ApiQuery({ ...ListUrlsDtoQuery.page })
+  @ApiQuery({ ...ListUrlsDtoQuery.pageSize })
   @Get()
   async listUrls(@Query(new ZodValidationPipe(listUrlsValidationSchema)) query: ListUrlsDto) {
     const queryData = query;

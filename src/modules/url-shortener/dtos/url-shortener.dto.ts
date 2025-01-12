@@ -116,6 +116,26 @@ export const listUrlsValidationSchema = z.object(
         message: 'Created at end must be a valid date',
       })
       .optional(),
+    page: z.preprocess(
+      zodStringToNumberPreprocessor,
+      z
+        .number({
+          invalid_type_error: 'Page must be a number',
+        })
+        .min(1, {
+          message: 'Page must be at least 1',
+        }),
+    ),
+    pageSize: z.preprocess(
+      zodStringToNumberPreprocessor,
+      z
+        .number({
+          invalid_type_error: 'Page size must be a number',
+        })
+        .min(1, {
+          message: 'Page size must be at least 1',
+        }),
+    ),
   },
   {
     invalid_type_error: 'Shorten URL body must be an object',
@@ -123,3 +143,65 @@ export const listUrlsValidationSchema = z.object(
   },
 );
 export class ListUrlsDto extends createZodDto(listUrlsValidationSchema) {}
+export const ListUrlsDtoQuery = {
+  id: {
+    name: 'id',
+    type: 'number',
+    required: false,
+  },
+  shortUrl: {
+    name: 'shortUrl',
+    type: 'string',
+    required: false,
+  },
+  originalUrl: {
+    name: 'originalUrl',
+    type: 'string',
+    required: false,
+  },
+  usageCountStart: {
+    name: 'usageCountStart',
+    type: 'number',
+    required: false,
+  },
+  usageCountEnd: {
+    name: 'usageCountEnd',
+    type: 'number',
+    required: false,
+  },
+  ipAddress: {
+    name: 'ipAddress',
+    type: 'string',
+    required: false,
+  },
+  validUntilStart: {
+    name: 'validUntilStart',
+    type: 'string',
+    required: false,
+  },
+  validUntilEnd: {
+    name: 'validUntilEnd',
+    type: 'string',
+    required: false,
+  },
+  createdAtStart: {
+    name: 'createdAtStart',
+    type: 'string',
+    required: false,
+  },
+  createdAtEnd: {
+    name: 'createdAtEnd',
+    type: 'string',
+    required: false,
+  },
+  page: {
+    name: 'page',
+    type: 'number',
+    required: true,
+  },
+  pageSize: {
+    name: 'pageSize',
+    type: 'number',
+    required: true,
+  },
+};

@@ -18,7 +18,6 @@ async function bootstrap() {
   patchNestJsSwagger();
   app.useGlobalFilters(new GlobalExceptionsFilter(app.get(HttpAdapterHost)));
   const port = process.env.PORT || 3001;
-  const env = process.env.NODE_ENV || 'development';
   await app.listen(port);
 }
 bootstrap();
