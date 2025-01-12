@@ -7,6 +7,7 @@ import { query } from 'express';
 import { TABLE_NAMES } from 'src/common/constants/tables.constant';
 import { CustomError } from 'src/common/errors/custom_error';
 import { CreateUrlData } from '../types/url-shortener-repository.types';
+import { ListUrlsDto } from '../dtos/url-shortener.dto';
 
 @Injectable()
 export class UrlShortenerRepositoryService {
@@ -125,5 +126,63 @@ export class UrlShortenerRepositoryService {
     let query = `DELETE FROM ${TABLE_NAMES.URLS} WHERE id = $1`;
     const result = await this.pg.query(query, [id]);
     return result;
+  }
+  // #region List URLs ------------------------------------------------------------------------------------------------------------------------
+  async listUrls(data: ListUrlsDto) {
+    let query = `SELECT * FROM ${TABLE_NAMES.URLS} WHERE 1=1`;
+    const vals: any[] = [];
+    let index = 1;
+    if (data.id) {
+      query += ` AND id = $${index}`;
+      vals.push(data.id);
+      index++;
+    }
+    if (data.shortUrl) {
+      query += ` AND short_url = $${index}`;
+      vals.push(data.shortUrl);
+      index++;
+    }
+    if (data.originalUrl) {
+      query += ` AND original_url = $${index}`;
+      vals.push(data.originalUrl);
+      index++;
+    }
+    if (data.usageCountStart) {
+      query += ` AND usage_count >= $${index}`;
+      vals.push(data.usageCountStart);
+      index++;
+    }
+    if (data.usageCountEnd) {
+      query += ` AND usage_count <= $${index}`;
+      vals.push(data.usageCountEnd);
+      index++;
+    }
+    if (data.createdAtStart) {
+      query += ` AND created_at >= $${index}`;
+      vals.push(data.createdAtStart);
+      index++;
+    }
+    if (data.createdAtEnd) {
+      query += ` AND created_at <= $${index}`;
+      vals.push(data.createdAtEnd);
+      index++;
+    }
+    if (data.validUntilStart) {
+      query += ` AND valid_until IS NOT NULL AND valid_until >= $${index}`;
+      vals.push(data.validUntilStart);
+      index++;
+    }
+    if (data.validUntilEnd) {
+      query += ` AND valid_until IS NOT NULL AND valid_until <= $${index}`;
+      vals.push(data.validUntilEnd);
+      index++;
+    }
+    if (data.ipAddress) {
+      query += ` AND ips @> $${index}`;
+      vals.push(`["${data.ipAddress}"]`);
+      index++;
+    }
+    const result = await this.pg.query(query, vals);
+    return result.rows as Url[];
   }
 }

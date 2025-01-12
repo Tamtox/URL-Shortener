@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { zodStringToNumberPreprocessor } from 'src/common/validation/preprocessors';
 import { z } from 'zod';
 
 // #region Shorten URL ---------------------------------------------------------------------------------------------------------------------
@@ -42,9 +43,12 @@ export class ShortenUrlDto extends createZodDto(shortenUrlValidationSchema) {}
 export const listUrlsValidationSchema = z.object(
   {
     id: z
-      .number({
-        invalid_type_error: 'ID must be a number',
-      })
+      .preprocess(
+        zodStringToNumberPreprocessor,
+        z.number({
+          invalid_type_error: 'ID must be a number',
+        }),
+      )
       .optional(),
     shortUrl: z
       .string({
@@ -57,14 +61,20 @@ export const listUrlsValidationSchema = z.object(
       })
       .optional(),
     usageCountStart: z
-      .number({
-        invalid_type_error: 'Usage count start must be a number',
-      })
+      .preprocess(
+        zodStringToNumberPreprocessor,
+        z.number({
+          invalid_type_error: 'Usage count start must be a number',
+        }),
+      )
       .optional(),
     usageCountEnd: z
-      .number({
-        invalid_type_error: 'Usage count end must be a number',
-      })
+      .preprocess(
+        zodStringToNumberPreprocessor,
+        z.number({
+          invalid_type_error: 'Usage count end must be a number',
+        }),
+      )
       .optional(),
     ipAddress: z
       .string({

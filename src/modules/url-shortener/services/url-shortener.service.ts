@@ -1,10 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { ShortenUrlDto } from '../dtos/url-shortener.dto';
+import { ListUrlsDto, ShortenUrlDto } from '../dtos/url-shortener.dto';
 import { CustomError } from 'src/common/errors/custom_error';
 import * as crypto from 'crypto';
 import { UrlShortenerRepositoryService } from './url-shortener-repository.service';
 import { CreateUrlData } from '../types/url-shortener-repository.types';
-import { console } from 'inspector';
+import { console, url } from 'inspector';
 
 @Injectable()
 export class UrlShortenerService {
@@ -148,8 +148,8 @@ export class UrlShortenerService {
     return;
   }
   // #region List URLs ----------------------------------------------------------------------------------------------------------------------
-  async listUrlsProcess(query: any) {
-    console.log(query);
-    return [123];
+  async listUrlsProcess(query: ListUrlsDto) {
+    const urls = await this.urlShortenerRepositoryService.listUrls(query);
+    return urls;
   }
 }

@@ -1,11 +1,15 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, Post, Query, Redirect } from '@nestjs/common';
 import { UrlShortenerService } from '../services/url-shortener.service';
-import { ShortenUrlDto, shortenUrlValidationSchema } from '../dtos/url-shortener.dto';
+import {
+  ListUrlsDto,
+  listUrlsValidationSchema,
+  ShortenUrlDto,
+  shortenUrlValidationSchema,
+} from '../dtos/url-shortener.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ControllerNames } from 'src/common/constants/controllers.constant';
 import { ZodValidationPipe } from 'src/common/pipes/validation.pipe';
 import { UrlDto } from '../models/short-url.model-type';
-import { query } from 'express';
 
 const CONTROLLER_NAME = ControllerNames.UrlShortener as const;
 const CONTROLLER_TAGS = [CONTROLLER_NAME] as const;
@@ -55,8 +59,9 @@ export class UrlShortenerController {
   // #region Get All URLs --------------------------------------------------------------------------------------------------------------------
   @ApiResponse({ status: HttpStatus.OK, description: 'All URLs found', type: UrlDto, isArray: true })
   @Get()
-  async listUrls(@Query() query: any) {
-    const urls = await this.urlShortenerService.listUrlsProcess(query);
+  async listUrls(@Query(new ZodValidationPipe(listUrlsValidationSchema)) query: ListUrlsDto) {
+    const queryData = query;
+    const urls = await this.urlShortenerService.listUrlsProcess(queryData);
     return urls;
   }
 }
