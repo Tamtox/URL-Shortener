@@ -4,8 +4,7 @@ import { ShortenUrlDto, shortenUrlValidationSchema } from '../dtos/url-shortener
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ControllerNames } from 'src/common/constants/controllers.constant';
 import { ZodValidationPipe } from 'src/common/pipes/validation.pipe';
-import { UrlDto } from '../models/short-url.model';
-import { UrlUsageDto } from '../models/url-usage.model';
+import { UrlDto } from '../models/short-url.model-type';
 
 const CONTROLLER_NAME = ControllerNames.UrlShortener as const;
 const CONTROLLER_TAGS = [CONTROLLER_NAME] as const;
@@ -15,7 +14,7 @@ export class UrlShortenerController {
   constructor(private readonly urlShortenerService: UrlShortenerService) {}
   // #region Shorten URL ---------------------------------------------------------------------------------------------------------------------
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Shortened URL created successfully', type: UrlDto })
-  @Post('shorten')
+  @Post('/shorten')
   @HttpCode(HttpStatus.CREATED)
   async shortenUrl(@Body(new ZodValidationPipe(shortenUrlValidationSchema)) shortenUrlDto: ShortenUrlDto) {
     const shortUrl = await this.urlShortenerService.createUrlProcess(shortenUrlDto);
@@ -31,11 +30,11 @@ export class UrlShortenerController {
     return { url: url.original_url };
   }
   // #region Get Original URL ----------------------------------------------------------------------------------------------------------------
-  @ApiResponse({ status: HttpStatus.OK, description: 'Original URL found' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Original URL found', type: UrlDto })
   @Get('/info/:shortUrl')
   async getOriginalUrl(@Param('shortUrl') shortUrl: string) {
-    const data = await this.urlShortenerService.getUsageStatsProcess(shortUrl);
-    return data;
+    const url = await this.urlShortenerService.checkUrlExists(null, shortUrl, null);
+    return url;
   }
   // #region Delete Short URL -----------------------------------------------------------------------------------------------------------------
   @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Short URL deleted successfully' })
@@ -45,11 +44,14 @@ export class UrlShortenerController {
     await this.urlShortenerService.deleteUrlProcess(shortUrl);
     return `Short URL ${shortUrl} was deleted successfully`;
   }
-  // #endregion Get URL Usage Stats -----------------------------------------------------------------------------------------------------------
-  @ApiResponse({ status: HttpStatus.OK, description: 'URL usage stats found', type: UrlUsageDto })
+  // #region Get URL Usage Stats -----------------------------------------------------------------------------------------------------------
+  @ApiResponse({ status: HttpStatus.OK, description: 'URL usage stats found', type: UrlDto })
   @Get('/analytics/:shortUrl')
   async getUsageStats(@Param('shortUrl') shortUrl: string) {
-    const usage = await this.urlShortenerService.getUsageStatsProcess(shortUrl);
-    return usage.usage;
+    const url = await this.urlShortenerService.checkUrlExists(null, shortUrl, null);
+    return url;
   }
+  // #region Get All URLs --------------------------------------------------------------------------------------------------------------------
+  @Get()
+  async getAllUrls() {}
 }

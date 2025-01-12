@@ -34,7 +34,7 @@ import { ConfigurableDatabaseModule, CONNECTION_POOL, DatabaseOptions, DRIZZLE_P
           user: databaseOptions.user,
           password: databaseOptions.password,
           database: databaseOptions.database,
-          ssl: { rejectUnauthorized: false },
+          // ssl: { rejectUnauthorized: false },
         });
       },
     },

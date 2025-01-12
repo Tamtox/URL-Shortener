@@ -17,7 +17,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
   patchNestJsSwagger();
   app.useGlobalFilters(new GlobalExceptionsFilter(app.get(HttpAdapterHost)));
-  console.log(123);
-  await app.listen(3001, '0.0.0.0');
+  const port = process.env.PORT || 3001;
+  const env = process.env.NODE_ENV || 'development';
+  await app.listen(port);
 }
 bootstrap();

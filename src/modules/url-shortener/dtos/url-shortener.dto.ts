@@ -13,9 +13,12 @@ export const shortenUrlValidationSchema = z.object(
         message: 'Url must be a valid URL',
       }),
     validUntil: z
-      .date({
-        invalid_type_error: 'Valid until must be a date',
+      .string({
+        invalid_type_error: 'Valid until must be a string',
         required_error: 'Valid until is required',
+      })
+      .datetime({
+        message: 'Valid until must be a valid date',
       })
       .optional(),
     alias: z
@@ -24,7 +27,7 @@ export const shortenUrlValidationSchema = z.object(
         required_error: 'Alias is required',
       })
       .max(20, {
-        message: 'Alias must be at most 10 characters long',
+        message: 'Alias must be at most 20 characters long',
       })
       .optional(),
   },
