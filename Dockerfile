@@ -13,4 +13,4 @@ RUN npm run build
 
 EXPOSE 3001
 
-CMD ["npm", "run", "docker:start:prod"]
+# CMD ["npm", "run","docker:start:prod"]

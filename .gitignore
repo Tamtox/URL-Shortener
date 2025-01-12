@@ -3,6 +3,7 @@
 /drizzle
 /node_modules
 /build
+/pgdata
 
 # Logs
 logs
