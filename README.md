@@ -1,3 +1,6 @@
+## To Run the project:
+    - docker-compose build -> docker-compose up
+
 
 ## /api
  - OpenAPI UI
