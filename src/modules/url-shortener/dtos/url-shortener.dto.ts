@@ -37,3 +37,79 @@ export const shortenUrlValidationSchema = z.object(
   },
 );
 export class ShortenUrlDto extends createZodDto(shortenUrlValidationSchema) {}
+
+// # region List URLs ---------------------------------------------------------------------------------------------------------------------
+export const listUrlsValidationSchema = z.object(
+  {
+    id: z
+      .number({
+        invalid_type_error: 'ID must be a number',
+      })
+      .optional(),
+    shortUrl: z
+      .string({
+        invalid_type_error: 'Short URL must be a string',
+      })
+      .optional(),
+    originalUrl: z
+      .string({
+        invalid_type_error: 'Original URL must be a string',
+      })
+      .optional(),
+    usageCountStart: z
+      .number({
+        invalid_type_error: 'Usage count start must be a number',
+      })
+      .optional(),
+    usageCountEnd: z
+      .number({
+        invalid_type_error: 'Usage count end must be a number',
+      })
+      .optional(),
+    ipAddress: z
+      .string({
+        invalid_type_error: 'IP address must be a string',
+      })
+      .ip({
+        message: 'IP address must be a valid IP address',
+      })
+      .optional(),
+    validUntilStart: z
+      .string({
+        invalid_type_error: 'Valid until start must be a string',
+      })
+      .datetime({
+        message: 'Valid until start must be a valid date',
+      })
+      .optional(),
+    validUntilEnd: z
+      .string({
+        invalid_type_error: 'Valid until end must be a string',
+      })
+      .datetime({
+        message: 'Valid until end must be a valid date',
+      })
+      .optional(),
+    createdAtStart: z
+      .string({
+        invalid_type_error: 'Created at start must be a string',
+      })
+      .datetime({
+        message: 'Created at start must be a valid date',
+      })
+      .optional(),
+    createdAtEnd: z
+      .string({
+        invalid_type_error: 'Created at end must be a string',
+      })
+      .datetime({
+        message: 'Created at end must be a valid date',
+      })
+      .optional(),
+  },
+  {
+    invalid_type_error: 'Shorten URL body must be an object',
+    required_error: 'Shorten URL body is required',
+  },
+);
+export class ListUrlsDto extends createZodDto(listUrlsValidationSchema) {}

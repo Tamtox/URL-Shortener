@@ -21,7 +21,6 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       message: exception instanceof HttpException ? exception.getResponse()['message'] : 'Internal server error',
       timestamp: new Date().toISOString(),
     };
-    console.log(exception);
     if (exception instanceof z.ZodError) {
       // Validation error
       const errors = exception.errors;

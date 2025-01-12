@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, Post, Redirect } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Ip, Param, Post, Query, Redirect } from '@nestjs/common';
 import { UrlShortenerService } from '../services/url-shortener.service';
 import { ShortenUrlDto, shortenUrlValidationSchema } from '../dtos/url-shortener.dto';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ControllerNames } from 'src/common/constants/controllers.constant';
 import { ZodValidationPipe } from 'src/common/pipes/validation.pipe';
 import { UrlDto } from '../models/short-url.model-type';
+import { query } from 'express';
 
 const CONTROLLER_NAME = ControllerNames.UrlShortener as const;
 const CONTROLLER_TAGS = [CONTROLLER_NAME] as const;
@@ -37,12 +38,12 @@ export class UrlShortenerController {
     return url;
   }
   // #region Delete Short URL -----------------------------------------------------------------------------------------------------------------
-  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Short URL deleted successfully' })
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiResponse({ status: HttpStatus.ACCEPTED, description: 'Short URL deleted successfully' })
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete('/delete/:shortUrl')
   async deleteShortUrl(@Param('shortUrl') shortUrl: string) {
     await this.urlShortenerService.deleteUrlProcess(shortUrl);
-    return `Short URL ${shortUrl} was deleted successfully`;
+    return { message: `Short URL ${shortUrl} was deleted successfully` };
   }
   // #region Get URL Usage Stats -----------------------------------------------------------------------------------------------------------
   @ApiResponse({ status: HttpStatus.OK, description: 'URL usage stats found', type: UrlDto })
@@ -52,6 +53,10 @@ export class UrlShortenerController {
     return url;
   }
   // #region Get All URLs --------------------------------------------------------------------------------------------------------------------
+  @ApiResponse({ status: HttpStatus.OK, description: 'All URLs found', type: UrlDto, isArray: true })
   @Get()
-  async getAllUrls() {}
+  async listUrls(@Query() query: any) {
+    const urls = await this.urlShortenerService.listUrlsProcess(query);
+    return urls;
+  }
 }

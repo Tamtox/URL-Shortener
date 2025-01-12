@@ -4,6 +4,7 @@ import { CustomError } from 'src/common/errors/custom_error';
 import * as crypto from 'crypto';
 import { UrlShortenerRepositoryService } from './url-shortener-repository.service';
 import { CreateUrlData } from '../types/url-shortener-repository.types';
+import { console } from 'inspector';
 
 @Injectable()
 export class UrlShortenerService {
@@ -42,10 +43,44 @@ export class UrlShortenerService {
   async createUrlProcess(body: ShortenUrlDto) {
     const existingUrl = await this.urlShortenerRepositoryService.getShortUrl(null, null, body.url);
     if (existingUrl) {
-      return existingUrl;
+      throw new CustomError('URL already exists', HttpStatus.BAD_REQUEST, 'Validation error');
     }
     let shortUrl: string;
     if (body.alias) {
+      let hasIllegalChars = false;
+      const illegalRoutePathChars = new Set([
+        '/',
+        '?',
+        '#',
+        ' ',
+        '%',
+        '&',
+        '=',
+        '+',
+        ':',
+        ';',
+        ',',
+        '@',
+        '[',
+        ']',
+        '{',
+        '}',
+        '|',
+        '\\',
+        '^',
+        '~',
+        '`',
+      ]);
+      for (let i = 0; i < body.alias.length; i++) {
+        if (illegalRoutePathChars.has(body.alias[i])) {
+          hasIllegalChars = true;
+          break;
+        }
+      }
+      if (hasIllegalChars) {
+        const message = `Alias must not contain any of the following characters: ${[...illegalRoutePathChars].join(' ')}`;
+        throw new CustomError(message, HttpStatus.BAD_REQUEST, 'Validation error');
+      }
       shortUrl = `short.url-${body.alias}`;
       const existingShortUrl = await this.urlShortenerRepositoryService.getShortUrl(null, shortUrl, null);
       if (existingShortUrl) {
@@ -111,5 +146,10 @@ export class UrlShortenerService {
     }
     await this.urlShortenerRepositoryService.deleteShortUrl(url.id);
     return;
+  }
+  // #region List URLs ----------------------------------------------------------------------------------------------------------------------
+  async listUrlsProcess(query: any) {
+    console.log(query);
+    return [123];
   }
 }
